@@ -10,7 +10,6 @@ from GraphAlgoInterface import GraphAlgoInterface
 
 class GraphAlgo(GraphAlgoInterface):
     def __init__(self, graph: GraphInterface = None):
-        super()
         self.graph = graph
         self.scc_set = set();
         self.scc_list = []
@@ -20,6 +19,9 @@ class GraphAlgo(GraphAlgoInterface):
 
     def get_graph(self) -> GraphInterface:
         return self.graph
+
+    def set_graph(self, graph: GraphInterface = None):
+        self.graph = graph
 
     def load_from_json(self, file_name: str) -> bool:
         #this method recives relative file path as file_name and attemps to open read it and create a grah from it.
@@ -66,11 +68,17 @@ class GraphAlgo(GraphAlgoInterface):
 
     def shortest_path(self, id1: int, id2: int) -> (float, list):
         #implemented shortest path algorithm using dijkstra
+        if self.graph is None:
+            return loat('inf'), []
+        nodes = self.graph.get_all_v()
+        if nodes.get(id1) is None or nodes.get(id2) is None:
+            return float('inf'), []
+
         queue = []
         visited = set()
         dist = {}
         prev = {}
-        for node in self.graph.get_all_v():
+        for node in nodes:
             dist[node] = float('inf')
             prev[node] = None
         dist[id1] = 0
@@ -95,7 +103,7 @@ class GraphAlgo(GraphAlgoInterface):
                         prev[neighbor_node_id] = id_weight_tuple[0]
                         queue.append((neighbor_node_id, dist[neighbor_node_id]))
 
-        return dist[id2], []
+        return float('inf'), []
 
 
     def trajan_algorithm(self, node_id):
@@ -137,6 +145,11 @@ class GraphAlgo(GraphAlgoInterface):
 
     def connected_component(self, id1: int) -> list:
         #returns a list of nodes that are together a strongly connected component using trajan_algorithm
+        if self.graph is None:
+            return []
+        nodes = self.graph.get_all_v()
+        if nodes.get(id1) is None:
+            return []
         self.reset_for_conectivity_algo()
         self.trajan_algorithm(id1)
         for scc in self.scc_list:
@@ -146,9 +159,11 @@ class GraphAlgo(GraphAlgoInterface):
 
     def connected_components(self) -> List[list]:
         #same as connected component but without specific node_id to start hence returns all strongly connected components
+        if self.graph is None:
+            return []
         self.reset_for_conectivity_algo()
-        
-        for node_id in self.graph.get_all_v():
+        nodes = self.graph.get_all_v()
+        for node_id in nodes:
             if node_id not in self.scc_set:
                 self.trajan_algorithm(node_id)
         return self.scc_list
