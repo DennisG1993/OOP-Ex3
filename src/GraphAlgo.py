@@ -1,5 +1,7 @@
 from typing import List, Dict
 import json
+import matplotlib.pyplot as plt
+import random
 
 from DiGraph import DiGraph
 from NodeData import NodeData
@@ -68,9 +70,9 @@ class GraphAlgo(GraphAlgoInterface):
         visited = set()
         dist = {}
         prev = {}
-        for v in self.graph.get_all_v():
-            dist[v] = float('inf')
-            prev[v] = None
+        for node in self.graph.get_all_v():
+            dist[node] = float('inf')
+            prev[node] = None
         dist[id1] = 0
         queue.append((id1, dist[id1]))
         while len(queue) and len(visited) != self.graph.v_size():
@@ -134,6 +136,7 @@ class GraphAlgo(GraphAlgoInterface):
          
 
     def connected_component(self, id1: int) -> list:
+        #returns a list of nodes that are together a strongly connected component using trajan_algorithm
         self.reset_for_conectivity_algo()
         self.trajan_algorithm(id1)
         for scc in self.scc_list:
@@ -142,6 +145,7 @@ class GraphAlgo(GraphAlgoInterface):
                 return scc
 
     def connected_components(self) -> List[list]:
+        #same as connected component but without specific node_id to start hence returns all strongly connected components
         self.reset_for_conectivity_algo()
         
         for node_id in self.graph.get_all_v():
@@ -149,10 +153,34 @@ class GraphAlgo(GraphAlgoInterface):
                 self.trajan_algorithm(node_id)
         return self.scc_list
 
+    def set_position_for_nodes(self):
+        #fill position for nodes in case there is none
+        nodes = self.graph.get_all_v().values()
+        graph_size = self.graph.v_size()
+        for node in nodes:
+            if node.pos is None:
+                x = random.random() * graph_size
+                y = random.random() * graph_size
+                pos = (x, y)
+                node.set_position(pos)
+
     def plot_graph(self) -> None:
-        #sadly i didnt have the time to implement this method
-        #hopefully we will be able to hand the assignment a day or two later so i can implement it
-        pass
+        #iterate the graph nodes and draw each nodes and its connections
+        nodes_dict = self.graph.get_all_v()
+        nodes = nodes_dict.values()
+        plt.title("graph")
+        self.set_position_for_nodes()
+        for node in nodes:
+            x = node.get_x()
+            y = node.get_y()
+            node_id = node.get_node_id()
+            plt.scatter(x, y, s=40)
+            plt.annotate(node_id, (x, y), fontsize=12)
+            for n in self.graph.all_out_edges_of_node(node.node_id):
+                x2 = nodes_dict.get(n).get_x()
+                y2 = nodes_dict.get(n).get_y()
+                plt.annotate(text="", xy=(x, y), xytext=(x2, y2), arrowprops=dict(arrowstyle="<-"))
+        plt.show()
 
     def reset_for_conectivity_algo(self):
         self.scc_set = set()

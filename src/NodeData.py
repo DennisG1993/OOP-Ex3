@@ -4,16 +4,27 @@ class NodeData:
     def __init__(self, node_id: int, pos: tuple = None):
         self.node_id: int = node_id
         self.pos = pos
-        self.dx = 0
-        self.dy = 0
         self.parent = None
         self.distance = float('inf')
 
     def get_node_id(self) -> int:
         return self.node_id
 
+    def get_x(self):
+        if self.pos is not None:
+            return self.pos[0]
+        return 0
+
+    def get_y(self):
+        if self.pos is not None:
+            return self.pos[1]
+        return 0
+
     def get_position(self) -> tuple:
         return self.pos
+    
+    def set_position(self, pos: tuple = None) -> None:
+        self.pos = pos
 
     def to_dict(self):
         if self.pos is not None:
